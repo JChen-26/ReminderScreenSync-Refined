@@ -1,0 +1,345 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 63;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		0AE29BA168FFBB6D87E9B8D7 /* Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = C48CCCB2A66670029F2BC506 /* Models.swift */; };
+		18185BC1CFCF1CED3C0D29BF /* SyncRecordStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A352E6887F1BC55BCF4731A /* SyncRecordStore.swift */; };
+		250F7685120E02261AD33F06 /* AppConstants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 298B8E68B077F74469392808 /* AppConstants.swift */; };
+		3658C39078A4C497DE5E1F12 /* AppModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 330264B1B61FAA88A40DC330 /* AppModel.swift */; };
+		38C49E8103CA9904EE9D90E1 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 1AB0D796DAB8B35D96B2BEC0 /* Assets.xcassets */; };
+		3928C0D8628AD43F175F8433 /* ReminderScreenSyncApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46357823C9B310A14C78125E /* ReminderScreenSyncApp.swift */; };
+		57042A3CBF3B2AD23E9E8C52 /* ZectrixAPIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2806D7A97A4AAAB679158157 /* ZectrixAPIClient.swift */; };
+		60EDE26A16E4EEC130A5F6B3 /* ReminderStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBBBA4534E233070C8567D30 /* ReminderStore.swift */; };
+		69A6F30B67EE785EFFD4BF9F /* SyncEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = DBF95487866E10F50EB50682 /* SyncEngine.swift */; };
+		9DA1F1E98F720B789F0DD6E0 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17B969803E3F4CF42F39F1F0 /* ContentView.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		17B969803E3F4CF42F39F1F0 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		1AB0D796DAB8B35D96B2BEC0 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		2806D7A97A4AAAB679158157 /* ZectrixAPIClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZectrixAPIClient.swift; sourceTree = "<group>"; };
+		298B8E68B077F74469392808 /* AppConstants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppConstants.swift; sourceTree = "<group>"; };
+		2E5E616E226A62A241B27341 /* ReminderScreenSync.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ReminderScreenSync.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		330264B1B61FAA88A40DC330 /* AppModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppModel.swift; sourceTree = "<group>"; };
+		46357823C9B310A14C78125E /* ReminderScreenSyncApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReminderScreenSyncApp.swift; sourceTree = "<group>"; };
+		498E0749E48D3A8BA3B34720 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		9A352E6887F1BC55BCF4731A /* SyncRecordStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyncRecordStore.swift; sourceTree = "<group>"; };
+		C48CCCB2A66670029F2BC506 /* Models.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Models.swift; sourceTree = "<group>"; };
+		CBBBA4534E233070C8567D30 /* ReminderStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReminderStore.swift; sourceTree = "<group>"; };
+		DBF95487866E10F50EB50682 /* SyncEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyncEngine.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXGroup section */
+		4658EDDA7628C79569AA85E8 = {
+			isa = PBXGroup;
+			children = (
+				659305870FA95E4A70AFDEC7 /* ReminderScreenSync */,
+				5D1DBE09F85767E94D4E022F /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		5D1DBE09F85767E94D4E022F /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				2E5E616E226A62A241B27341 /* ReminderScreenSync.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		659305870FA95E4A70AFDEC7 /* ReminderScreenSync */ = {
+			isa = PBXGroup;
+			children = (
+				298B8E68B077F74469392808 /* AppConstants.swift */,
+				330264B1B61FAA88A40DC330 /* AppModel.swift */,
+				1AB0D796DAB8B35D96B2BEC0 /* Assets.xcassets */,
+				17B969803E3F4CF42F39F1F0 /* ContentView.swift */,
+				498E0749E48D3A8BA3B34720 /* Info.plist */,
+				C48CCCB2A66670029F2BC506 /* Models.swift */,
+				46357823C9B310A14C78125E /* ReminderScreenSyncApp.swift */,
+				CBBBA4534E233070C8567D30 /* ReminderStore.swift */,
+				DBF95487866E10F50EB50682 /* SyncEngine.swift */,
+				9A352E6887F1BC55BCF4731A /* SyncRecordStore.swift */,
+				2806D7A97A4AAAB679158157 /* ZectrixAPIClient.swift */,
+			);
+			path = ReminderScreenSync;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		22FE62C3A768C6FCC156CB45 /* ReminderScreenSync */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = BAC6A1934FD00EF996EEBCE5 /* Build configuration list for PBXNativeTarget "ReminderScreenSync" */;
+			buildPhases = (
+				1DBC90B36B5FF77D46D97465 /* Sources */,
+				91E7FCCDD7653CBF69256A68 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = ReminderScreenSync;
+			packageProductDependencies = (
+			);
+			productName = ReminderScreenSync;
+			productReference = 2E5E616E226A62A241B27341 /* ReminderScreenSync.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		656531A9DBB19BEA99B0CF57 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 1430;
+				TargetAttributes = {
+					22FE62C3A768C6FCC156CB45 = {
+						ProvisioningStyle = Automatic;
+					};
+				};
+			};
+			buildConfigurationList = 701EB896D468CC7A0B99119F /* Build configuration list for PBXProject "ReminderScreenSync" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				Base,
+				en,
+			);
+			mainGroup = 4658EDDA7628C79569AA85E8;
+			minimizedProjectReferenceProxies = 1;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				22FE62C3A768C6FCC156CB45 /* ReminderScreenSync */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		91E7FCCDD7653CBF69256A68 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				38C49E8103CA9904EE9D90E1 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		1DBC90B36B5FF77D46D97465 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				250F7685120E02261AD33F06 /* AppConstants.swift in Sources */,
+				3658C39078A4C497DE5E1F12 /* AppModel.swift in Sources */,
+				9DA1F1E98F720B789F0DD6E0 /* ContentView.swift in Sources */,
+				0AE29BA168FFBB6D87E9B8D7 /* Models.swift in Sources */,
+				3928C0D8628AD43F175F8433 /* ReminderScreenSyncApp.swift in Sources */,
+				60EDE26A16E4EEC130A5F6B3 /* ReminderStore.swift in Sources */,
+				69A6F30B67EE785EFFD4BF9F /* SyncEngine.swift in Sources */,
+				18185BC1CFCF1CED3C0D29BF /* SyncRecordStore.swift in Sources */,
+				57042A3CBF3B2AD23E9E8C52 /* ZectrixAPIClient.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		39C77C8DBE0A6CE005D8F486 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"DEBUG=1",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 13.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_STRICT_CONCURRENCY = minimal;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		5E0CA55035F0E3D99FEA981D /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				DEVELOPMENT_TEAM = FD64Y49J9Q;
+				ENABLE_HARDENED_RUNTIME = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = ReminderScreenSync/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 13.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.local.ReminderScreenSync;
+				PRODUCT_NAME = ReminderScreenSync;
+				SDKROOT = macosx;
+			};
+			name = Release;
+		};
+		743331B8FD8EB77F4B40D0F8 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				DEVELOPMENT_TEAM = FD64Y49J9Q;
+				ENABLE_HARDENED_RUNTIME = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = ReminderScreenSync/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 13.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.local.ReminderScreenSync;
+				PRODUCT_NAME = ReminderScreenSync;
+				SDKROOT = macosx;
+			};
+			name = Debug;
+		};
+		9E644083EA7D6F9D4157F1DD /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 13.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_STRICT_CONCURRENCY = minimal;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		701EB896D468CC7A0B99119F /* Build configuration list for PBXProject "ReminderScreenSync" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				39C77C8DBE0A6CE005D8F486 /* Debug */,
+				9E644083EA7D6F9D4157F1DD /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		BAC6A1934FD00EF996EEBCE5 /* Build configuration list for PBXNativeTarget "ReminderScreenSync" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				743331B8FD8EB77F4B40D0F8 /* Debug */,
+				5E0CA55035F0E3D99FEA981D /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 656531A9DBB19BEA99B0CF57 /* Project object */;
+}

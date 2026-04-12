@@ -1,0 +1,25 @@
+name: ReminderScreenSync
+options:
+  minimumXcodeGenVersion: 2.42.0
+  deploymentTarget:
+    macOS: "13.0"
+settings:
+  base:
+    SWIFT_VERSION: 5.0
+    SWIFT_STRICT_CONCURRENCY: minimal
+targets:
+  ReminderScreenSync:
+    type: application
+    platform: macOS
+    deploymentTarget: "13.0"
+    sources:
+      - path: ReminderScreenSync
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.local.ReminderScreenSync
+        PRODUCT_NAME: ReminderScreenSync
+        INFOPLIST_FILE: ReminderScreenSync/Info.plist
+        GENERATE_INFOPLIST_FILE: NO
+        ENABLE_HARDENED_RUNTIME: YES
+        CODE_SIGN_STYLE: Automatic
+
