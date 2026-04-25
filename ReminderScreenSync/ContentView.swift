@@ -1,7 +1,8 @@
 import SwiftUI
 
 struct ContentView: View {
-    @StateObject private var model = AppModel()
+    @EnvironmentObject var model: AppModel
+    @State private var showingEditSheet = false
 
     var body: some View {
         HStack(alignment: .top, spacing: 20) {
@@ -17,15 +18,21 @@ struct ContentView: View {
         .task {
             await model.bootstrap()
         }
+        .sheet(isPresented: $showingEditSheet) {
+            ProfileEditView(profile: model.editingProfile)
+                .environmentObject(model)
+                .onDisappear {
+                    model.editingProfile = nil
+                }
+        }
     }
 
     private var sidebar: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 16) {
                 header
-                connectionPanel
-                reminderPanel
-                controlPanel
+                globalConnectionPanel
+                profileListPanel
                 rulesPanel
             }
             .frame(maxWidth: .infinity, alignment: .leading)
@@ -56,7 +63,7 @@ struct ContentView: View {
                     Text(AppConstants.appName)
                         .font(.system(size: 30, weight: .semibold))
 
-                    Text("统一管理设备接入、Reminders 列表选择、同步服务与运行日志。")
+                    Text("统一管理设备接入、同步任务与运行日志。")
                         .foregroundStyle(.secondary)
                         .fixedSize(horizontal: false, vertical: true)
                 }
@@ -72,12 +79,12 @@ struct ContentView: View {
                 )
                 statusBadge(
                     title: "同步服务",
-                    value: model.isSyncing ? "同步中" : (model.isRunning ? "运行中" : "未运行"),
+                    value: model.isSyncing ? "同步中" : (model.isRunning ? "\(model.runningProfileCount) 个运行中" : "未运行"),
                     tint: model.isRunning ? .green : .secondary
                 )
                 statusBadge(
-                    title: "设备轮询",
-                    value: model.pollIntervalMinutes.map { "\($0) 分钟" } ?? "未设置",
+                    title: "同步任务",
+                    value: "\(model.profileManager.profiles.count) 个",
                     tint: .orange
                 )
             }
@@ -90,17 +97,54 @@ struct ContentView: View {
         )
     }
 
-    private var connectionPanel: some View {
-        panel(title: "设备接入", subtitle: "填写极趣云平台 API Key，加载账号下的设备并选择同步目标。") {
-            VStack(alignment: .leading, spacing: 12) {
-                Text(AppConstants.apiKeyLabel)
-                    .font(.subheadline.weight(.medium))
-                    .foregroundStyle(.secondary)
+    private var globalConnectionPanel: some View {
+        panel(title: "准备工作", subtitle: "授权 Apple Reminders 并填入极趣云平台 API Key，加载设备。") {
+            VStack(alignment: .leading, spacing: 16) {
+                VStack(alignment: .leading, spacing: 8) {
+                    HStack {
+                        Text("Reminders 权限")
+                            .font(.subheadline.weight(.medium))
+                            .foregroundStyle(.secondary)
+                        Spacer()
+                        Text(model.reminderStore.authorizationSummary)
+                            .font(.caption.weight(.medium))
+                            .foregroundStyle(.blue)
+                    }
 
-                SecureField("请输入 API key", text: $model.apiKey)
-                    .textFieldStyle(.roundedBorder)
+                    HStack(spacing: 8) {
+                        Button {
+                            Task { await model.requestReminderAccess() }
+                        } label: {
+                            Text(model.isLoadingReminderLists ? "加载中..." : "授权并读取列表")
+                                .frame(maxWidth: .infinity)
+                        }
+                        .buttonStyle(.borderedProminent)
+                        .disabled(model.isLoadingReminderLists)
 
-                actionRow {
+                        Button("刷新列表") {
+                            Task { await model.loadReminderLists() }
+                        }
+                        .buttonStyle(.bordered)
+                        .disabled(model.isLoadingReminderLists)
+                    }
+
+                    if !model.reminderLists.isEmpty {
+                        Text("已加载 \(model.reminderLists.count) 个 Reminders 列表")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                }
+
+                Divider()
+
+                VStack(alignment: .leading, spacing: 8) {
+                    Text(AppConstants.apiKeyLabel)
+                        .font(.subheadline.weight(.medium))
+                        .foregroundStyle(.secondary)
+
+                    SecureField("请输入 API key", text: $model.apiKey)
+                        .textFieldStyle(.roundedBorder)
+
                     Button {
                         Task { await model.loadDevices() }
                     } label: {
@@ -109,133 +153,136 @@ struct ContentView: View {
                     }
                     .buttonStyle(.borderedProminent)
                     .disabled(!model.canLoadDevices || model.isLoadingDevices)
-                } secondary: {
-                    Button("立即同步") {
-                        model.syncNow()
-                    }
-                    .buttonStyle(.bordered)
-                    .disabled(!model.isRunning || model.isSyncing)
-                }
-
-                pickerRow(label: "AI便利贴设备") {
-                    Picker(
-                        "AI便利贴设备",
-                        selection: Binding(
-                            get: { model.selectedDevice?.deviceId ?? "" },
-                            set: { model.selectedDeviceId = $0 }
-                        )
-                    ) {
-                        Text("请选择设备").tag("")
-                        ForEach(model.devices) { device in
-                            Text(device.displayName).tag(device.deviceId)
-                        }
-                    }
-                    .pickerStyle(.menu)
                 }
             }
         }
     }
 
-    private var reminderPanel: some View {
-        panel(title: "Reminders 列表", subtitle: "支持多选。同步到 AI便利贴 时会将所有勾选列表合并处理，不区分来源列表。") {
+    private var profileListPanel: some View {
+        panel(title: "同步任务", subtitle: "每个任务对应一台 AI便利贴 设备和一组 Reminders 列表。") {
             VStack(alignment: .leading, spacing: 12) {
-                actionRow {
+                HStack(spacing: 8) {
                     Button {
-                        Task { await model.requestReminderAccess() }
+                        model.editingProfile = nil
+                        showingEditSheet = true
                     } label: {
-                        Text(model.isLoadingReminderLists ? "加载中..." : "授权并读取列表")
+                        Label("添加任务", systemImage: "plus")
                             .frame(maxWidth: .infinity)
                     }
                     .buttonStyle(.borderedProminent)
-                    .disabled(model.isLoadingReminderLists)
-                } secondary: {
-                    Button("刷新列表") {
-                        Task { await model.loadReminderLists() }
+
+                    Button {
+                        if model.isRunning {
+                            model.stopAllProfiles()
+                        } else {
+                            Task {
+                                for profile in model.profileManager.profiles {
+                                    await model.startProfile(profile)
+                                }
+                            }
+                        }
+                    } label: {
+                        Text(model.isRunning ? "全部停止" : "全部启动")
+                            .frame(maxWidth: .infinity)
                     }
                     .buttonStyle(.bordered)
-                    .disabled(model.isLoadingReminderLists)
                 }
 
-                HStack {
-                    detailRow(label: "已选择", value: "\(model.selectedReminderLists.count) 个列表")
-                    Spacer()
-                    Button("全选") {
-                        model.selectAllReminderLists()
-                    }
-                    .buttonStyle(.bordered)
-                    .disabled(model.reminderLists.isEmpty)
-
-                    Button("清空") {
-                        model.clearReminderListSelection()
-                    }
-                    .buttonStyle(.bordered)
-                    .disabled(model.selectedReminderLists.isEmpty)
-                }
-
-                if model.reminderLists.isEmpty {
-                    emptyState("当前没有可同步的 Apple Reminders 列表。")
+                if model.profileManager.profiles.isEmpty {
+                    emptyState("当前没有同步任务。点击「添加任务」创建。")
                 } else {
                     ScrollView {
-                        LazyVStack(alignment: .leading, spacing: 8) {
-                            ForEach(model.reminderLists) { list in
-                                reminderListRow(list)
+                        LazyVStack(alignment: .leading, spacing: 10) {
+                            ForEach(model.profileManager.profiles) { profile in
+                                profileCard(profile)
                             }
                         }
                     }
-                    .frame(maxHeight: 250)
+                    .frame(maxHeight: 320)
                 }
-
-                detailRow(label: "默认回写列表", value: model.writeBackReminderList?.displayName ?? "未选择")
             }
         }
     }
 
-    private var controlPanel: some View {
-        panel(title: "同步服务", subtitle: "运行后监听 Apple Reminders 变更，并按设定周期轮询 AI便利贴 端状态。") {
-            VStack(alignment: .leading, spacing: 12) {
-                actionRow {
+    private func profileCard(_ profile: SyncProfile) -> some View {
+        let isRunning = model.isProfileRunning(profile.id)
+        let isSyncing = model.isProfileSyncing(profile.id)
+
+        return VStack(alignment: .leading, spacing: 10) {
+            HStack(spacing: 8) {
+                Circle()
+                    .fill(isRunning ? (isSyncing ? Color.orange : Color.green) : Color.secondary.opacity(0.5))
+                    .frame(width: 8, height: 8)
+
+                Text(profile.name)
+                    .font(.subheadline.weight(.semibold))
+
+                Spacer()
+
+                Button {
+                    model.editingProfile = profile
+                    showingEditSheet = true
+                } label: {
+                    Image(systemName: "pencil")
+                }
+                .buttonStyle(.borderless)
+                .foregroundStyle(.secondary)
+
+                Button {
+                    model.profileManager.remove(id: profile.id)
+                    model.stopProfile(profile.id)
+                } label: {
+                    Image(systemName: "trash")
+                }
+                .buttonStyle(.borderless)
+                .foregroundStyle(.red.opacity(0.8))
+            }
+
+            VStack(alignment: .leading, spacing: 4) {
+                Text("设备：\(profile.deviceName)")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                Text("列表：\(model.listNames(for: profile.reminderListIDs).joined(separator: "、"))")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                Text("轮询：每 \(profile.pollIntervalMinutes) 分钟")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                if let lastSync = model.profileLastSyncDate(profile.id) {
+                    Text("最近同步：\(AppModel.displayDateFormatter.string(from: lastSync))")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+            }
+
+            HStack(spacing: 8) {
+                if isRunning {
                     Button {
-                        Task { await model.startSync() }
+                        model.stopProfile(profile.id)
                     } label: {
-                        Text(model.isRunning ? "重新启动同步服务" : "启动同步服务")
+                        Text("停止")
+                            .frame(maxWidth: .infinity)
+                    }
+                    .buttonStyle(.bordered)
+                } else {
+                    Button {
+                        Task { await model.startProfile(profile) }
+                    } label: {
+                        Text("启动")
                             .frame(maxWidth: .infinity)
                     }
                     .buttonStyle(.borderedProminent)
-                    .disabled(!model.canStartSync)
-                } secondary: {
-                    Button("停止同步") {
-                        model.stopSync()
-                    }
-                    .buttonStyle(.bordered)
-                    .disabled(!model.isRunning)
                 }
 
-                VStack(alignment: .leading, spacing: 6) {
-                    Text("设备轮询周期")
-                        .font(.subheadline.weight(.medium))
-                        .foregroundStyle(.secondary)
-
-                    HStack(spacing: 10) {
-                        TextField("1", text: $model.pollIntervalMinutesText)
-                            .textFieldStyle(.roundedBorder)
-                            .frame(width: 96)
-                        Text("分钟")
-                            .foregroundStyle(.secondary)
-                    }
-
-                    Text(model.pollIntervalValidationMessage ?? "请输入正整数分钟数，例如 1、5、15。")
-                        .font(.caption)
-                        .foregroundStyle(model.pollIntervalValidationMessage == nil ? Color.secondary : Color.red)
-                        .fixedSize(horizontal: false, vertical: true)
+                Button("立即同步") {
+                    model.syncProfile(profile.id)
                 }
-
-                VStack(alignment: .leading, spacing: 10) {
-                    detailRow(label: "服务状态", value: model.statusMessage)
-                    detailRow(label: "上次同步", value: model.lastSyncDate.map(AppModel.displayDateFormatter.string(from:)) ?? "尚未同步")
-                    detailRow(label: "目标设备", value: model.selectedDevice?.displayName ?? "未选择")
-                }
+                .buttonStyle(.bordered)
+                .disabled(!isRunning || isSyncing)
             }
         }
+        .padding(12)
+        .background(Color.primary.opacity(0.035), in: RoundedRectangle(cornerRadius: 8, style: .continuous))
     }
 
     private var rulesPanel: some View {
@@ -255,7 +302,9 @@ struct ContentView: View {
             VStack(alignment: .leading, spacing: 14) {
                 detailGrid
                 Divider()
-                Text(model.statusMessage)
+                Text(model.isRunning
+                     ? "\(model.runningProfileCount) 个同步任务正在运行，最近同步：\(model.lastSyncDate.map(AppModel.displayDateFormatter.string(from:)) ?? "尚未同步")"
+                     : "同步服务未运行。")
                     .foregroundStyle(.secondary)
                     .fixedSize(horizontal: false, vertical: true)
             }
@@ -264,10 +313,8 @@ struct ContentView: View {
 
     private var detailGrid: some View {
         LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 12), count: 2), spacing: 12) {
-            infoTile(title: "同步列表", value: model.selectedReminderListSummary)
-            infoTile(title: "默认回写列表", value: model.writeBackReminderList?.displayName ?? "未选择")
-            infoTile(title: "目标设备", value: model.selectedDevice?.displayName ?? "未选择")
-            infoTile(title: "设备轮询周期", value: model.pollIntervalMinutes.map { "\($0) 分钟" } ?? "未设置")
+            infoTile(title: "同步任务数", value: "\(model.profileManager.profiles.count) 个")
+            infoTile(title: "运行中任务", value: "\(model.runningProfileCount) 个")
             infoTile(title: "Reminders 权限", value: model.reminderStore.authorizationSummary)
             infoTile(title: "最近同步", value: model.lastSyncDate.map(AppModel.displayDateFormatter.string(from:)) ?? "尚未同步")
         }
@@ -308,25 +355,6 @@ struct ContentView: View {
                 }
             }
         }
-    }
-
-    private func reminderListRow(_ list: ReminderListOption) -> some View {
-        Toggle(isOn: Binding(
-            get: { model.selectedReminderListIDs.contains(list.id) },
-            set: { model.setReminderListSelected(list.id, isSelected: $0) }
-        )) {
-            VStack(alignment: .leading, spacing: 4) {
-                Text(list.title)
-                    .font(.subheadline.weight(.medium))
-                Text(list.sourceTitle)
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-            }
-            .frame(maxWidth: .infinity, alignment: .leading)
-        }
-        .toggleStyle(.checkbox)
-        .padding(10)
-        .background(Color.primary.opacity(0.035), in: RoundedRectangle(cornerRadius: 8, style: .continuous))
     }
 
     private func panel<Content: View>(
@@ -370,25 +398,6 @@ struct ContentView: View {
             RoundedRectangle(cornerRadius: 8, style: .continuous)
                 .strokeBorder(tint.opacity(0.18), lineWidth: 1)
         )
-    }
-
-    private func actionRow<Primary: View, Secondary: View>(
-        @ViewBuilder primary: () -> Primary,
-        @ViewBuilder secondary: () -> Secondary
-    ) -> some View {
-        HStack(spacing: 10) {
-            primary()
-            secondary()
-        }
-    }
-
-    private func pickerRow<Content: View>(label: String, @ViewBuilder content: () -> Content) -> some View {
-        VStack(alignment: .leading, spacing: 6) {
-            Text(label)
-                .font(.subheadline.weight(.medium))
-                .foregroundStyle(.secondary)
-            content()
-        }
     }
 
     private func detailRow(label: String, value: String) -> some View {
