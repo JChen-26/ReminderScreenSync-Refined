@@ -6,107 +6,48 @@ final class AppModel: ObservableObject {
     @Published var apiKey: String {
         didSet {
             UserDefaults.standard.set(apiKey, forKey: Keys.apiKey)
-            if oldValue != apiKey { stopSync() }
         }
     }
 
     @Published var devices: [ScreenDevice] = []
-    @Published var selectedDeviceId: String {
-        didSet {
-            UserDefaults.standard.set(selectedDeviceId, forKey: Keys.selectedDeviceId)
-            if oldValue != selectedDeviceId { stopSync() }
-        }
-    }
     @Published var reminderLists: [ReminderListOption] = []
-    @Published var selectedReminderListIDs: Set<String> {
-        didSet {
-            UserDefaults.standard.set(Array(selectedReminderListIDs).sorted(), forKey: Keys.selectedReminderListIDs)
-            if oldValue != selectedReminderListIDs { stopSync() }
-        }
-    }
-    @Published var pollIntervalMinutesText: String {
-        didSet {
-            UserDefaults.standard.set(pollIntervalMinutesText, forKey: Keys.pollIntervalMinutesText)
-            if oldValue != pollIntervalMinutesText { stopSync() }
-        }
-    }
 
     @Published var isLoadingDevices = false
     @Published var isLoadingReminderLists = false
-    @Published var isRunning = false
-    @Published var isSyncing = false
-    @Published var statusMessage = "请填写极趣云平台 API Key，加载设备，并授权 Apple Reminders。"
-    @Published var lastSyncDate: Date?
     @Published var logs: [SyncLogEntry] = []
+    @Published var autoStartSync: Bool {
+        didSet {
+            UserDefaults.standard.set(autoStartSync, forKey: Keys.autoStartSync)
+        }
+    }
+    @Published var editingProfile: SyncProfile? = nil
 
     let reminderStore = ReminderStore()
+    let profileManager = ProfileManager()
 
-    private var syncEngine: SyncEngine?
+    @Published private var engines: [UUID: SyncEngine] = [:]
+    @Published private var lastSyncDates: [UUID: Date] = [:]
+    @Published private var syncingStates: [UUID: Bool] = [:]
 
     init() {
         self.apiKey = UserDefaults.standard.string(forKey: Keys.apiKey) ?? ""
-        self.selectedDeviceId = UserDefaults.standard.string(forKey: Keys.selectedDeviceId) ?? ""
-        self.selectedReminderListIDs = Set(UserDefaults.standard.stringArray(forKey: Keys.selectedReminderListIDs) ?? [])
-        self.pollIntervalMinutesText =
-            UserDefaults.standard.string(forKey: Keys.pollIntervalMinutesText) ??
-            String(AppConstants.defaultPollIntervalMinutes)
+        self.autoStartSync = UserDefaults.standard.bool(forKey: Keys.autoStartSync)
         reminderStore.refreshAuthorizationSummary()
     }
 
-    var selectedDevice: ScreenDevice? {
-        devices.first { $0.deviceId == selectedDeviceId }
-    }
-
-    var selectedReminderLists: [ReminderListOption] {
-        reminderLists.filter { selectedReminderListIDs.contains($0.id) }
-    }
-
-    var selectedReminderListSummary: String {
-        switch selectedReminderLists.count {
-        case 0:
-            return "未选择"
-        case 1:
-            return selectedReminderLists[0].displayName
-        case 2...3:
-            return selectedReminderLists.map(\.displayName).joined(separator: "、")
-        default:
-            let leading = selectedReminderLists.prefix(3).map(\.displayName).joined(separator: "、")
-            return "\(leading) 等 \(selectedReminderLists.count) 个列表"
-        }
-    }
-
-    var writeBackReminderList: ReminderListOption? {
-        guard let identifier = reminderStore.preferredWriteBackListID(from: selectedReminderLists.map(\.id)) else {
-            return selectedReminderLists.first
-        }
-        return reminderLists.first { $0.id == identifier }
-    }
-
-    var pollIntervalMinutes: Int? {
-        guard let value = Int(pollIntervalMinutesText.trimmingCharacters(in: .whitespacesAndNewlines)),
-              value > 0 else {
-            return nil
-        }
-        return value
-    }
-
-    var pollIntervalValidationMessage: String? {
-        let trimmed = pollIntervalMinutesText.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !trimmed.isEmpty else { return "请输入轮询分钟数。" }
-        return pollIntervalMinutes == nil ? "轮询时间必须是大于 0 的整数分钟。" : nil
-    }
-
-    var canLoadDevices: Bool {
-        !apiKey.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
-    }
-
-    var canStartSync: Bool {
-        canLoadDevices && !selectedDeviceId.isEmpty && !selectedReminderLists.isEmpty && pollIntervalMinutes != nil
-    }
+    var isRunning: Bool { !engines.isEmpty }
+    var isSyncing: Bool { syncingStates.values.contains(true) }
+    var lastSyncDate: Date? { lastSyncDates.values.max() }
+    var runningProfileCount: Int { engines.count }
 
     func bootstrap() async {
         if Self.hasFullReminderAccess(EKEventStore.authorizationStatus(for: .reminder)) {
             await loadReminderLists()
+        }
+        if autoStartSync {
+            for profile in profileManager.profiles where profile.isEnabled {
+                await startProfile(profile)
+            }
         }
     }
 
@@ -121,22 +62,15 @@ final class AppModel: ObservableObject {
         do {
             let lists = try await reminderStore.fetchReminderLists()
             reminderLists = lists
-            let validIdentifiers = Set(lists.map(\.id))
-            selectedReminderListIDs = selectedReminderListIDs.intersection(validIdentifiers)
-            if selectedReminderListIDs.isEmpty, let first = lists.first {
-                selectedReminderListIDs = [first.id]
-            }
-            statusMessage = lists.isEmpty ? "没有可同步的 Apple Reminders 列表。" : "已加载 \(lists.count) 个 Apple Reminders 列表。"
-            appendLog(statusMessage)
+            appendLog(lists.isEmpty ? "没有可同步的 Apple Reminders 列表。" : "已加载 \(lists.count) 个 Apple Reminders 列表。")
         } catch {
-            statusMessage = error.localizedDescription
             appendLog(error.localizedDescription)
         }
     }
 
     func loadDevices() async {
-        guard canLoadDevices else {
-            statusMessage = "请先填写 \(AppConstants.openPlatformName) API Key。"
+        guard !apiKey.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
+            appendLog("请先填写 \(AppConstants.openPlatformName) API Key。")
             return
         }
 
@@ -146,79 +80,109 @@ final class AppModel: ObservableObject {
         do {
             let client = ZectrixAPIClient(apiKey: apiKey)
             devices = try await client.fetchDevices()
-            if !devices.contains(where: { $0.deviceId == selectedDeviceId }) {
-                selectedDeviceId = devices.first?.deviceId ?? ""
-            }
-            statusMessage = devices.isEmpty ? "没有获取到 \(AppConstants.deviceName) 设备。" : "已获取 \(devices.count) 台 \(AppConstants.deviceName) 设备。"
-            appendLog(statusMessage)
+            appendLog(devices.isEmpty ? "没有获取到 \(AppConstants.deviceName) 设备。" : "已获取 \(devices.count) 台 \(AppConstants.deviceName) 设备。")
+            updateProfileDeviceNames()
         } catch {
-            statusMessage = "获取设备失败：\(error.localizedDescription)"
-            appendLog(statusMessage)
+            appendLog("获取设备失败：\(error.localizedDescription)")
         }
     }
 
-    func startSync() async {
-        if reminderLists.isEmpty {
-            await loadReminderLists()
-        }
+    var canLoadDevices: Bool {
+        !apiKey.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+    }
 
-        guard canStartSync,
-              let pollIntervalMinutes,
-              let writeBackReminderListID = writeBackReminderList?.id else {
-            statusMessage = "请先填写 API Key，选择设备、至少一个提醒事项列表，并输入有效的轮询分钟数。"
+    func canStartProfile(_ profile: SyncProfile) -> Bool {
+        canLoadDevices
+            && !profile.deviceId.isEmpty
+            && !profile.reminderListIDs.isEmpty
+            && profile.pollIntervalMinutes > 0
+    }
+
+    func startProfile(_ profile: SyncProfile) async {
+        guard canStartProfile(profile) else {
+            appendLog("[\(profile.name)] 配置不完整，无法启动同步。")
             return
         }
+
+        let selectedLists = reminderLists.filter { profile.reminderListIDs.contains($0.id) }
+        guard !selectedLists.isEmpty else {
+            appendLog("[\(profile.name)] 所选的 Reminders 列表不存在或已删除。")
+            return
+        }
+
+        let writeBackID = reminderStore.preferredWriteBackListID(from: profile.reminderListIDs)
+            ?? selectedLists.first?.id
+            ?? profile.reminderListIDs.first!
+
+        stopProfile(profile.id)
 
         do {
             try await reminderStore.requestAccessIfNeeded()
         } catch {
-            statusMessage = error.localizedDescription
             appendLog(error.localizedDescription)
             return
         }
 
-        stopSync()
-        let selectedLists = selectedReminderLists
         let engine = SyncEngine(
             apiKey: apiKey,
-            deviceId: selectedDeviceId,
+            deviceId: profile.deviceId,
             selectedReminderLists: selectedLists,
-            writeBackReminderListID: writeBackReminderListID,
+            writeBackReminderListID: writeBackID,
             reminderStore: reminderStore,
-            pollInterval: TimeInterval(pollIntervalMinutes * 60)
+            pollInterval: TimeInterval(profile.pollIntervalMinutes * 60)
         )
+        let profileId = profile.id
+        let profileName = profile.name
         engine.onLog = { [weak self] message in
-            self?.appendLog(message)
+            self?.appendLog("[\(profileName)] \(message)")
         }
         engine.onSyncingChanged = { [weak self] isSyncing in
-            self?.isSyncing = isSyncing
+            self?.syncingStates[profileId] = isSyncing
         }
         engine.onLastSyncChanged = { [weak self] date in
-            self?.lastSyncDate = date
-            self?.statusMessage = "最近同步：\(Self.displayDateFormatter.string(from: date))"
+            self?.lastSyncDates[profileId] = date
         }
-        syncEngine = engine
-        isRunning = true
-        statusMessage = "同步服务运行中：\(selectedReminderListSummary) -> \(selectedDevice?.displayName ?? selectedDeviceId)"
+        engines[profileId] = engine
         engine.start()
+        appendLog("[\(profileName)] 同步服务已启动。")
     }
 
-    func stopSync() {
-        syncEngine?.stop()
-        syncEngine = nil
-        isRunning = false
-        isSyncing = false
-        if !statusMessage.hasPrefix("获取设备失败") {
-            statusMessage = "同步服务已停止。"
+    func stopProfile(_ id: UUID) {
+        guard let engine = engines[id] else { return }
+        engine.stop()
+        engines.removeValue(forKey: id)
+        syncingStates.removeValue(forKey: id)
+        if let name = profileManager.profile(id: id)?.name {
+            appendLog("[\(name)] 同步服务已停止。")
         }
     }
 
-    func syncNow() {
-        guard isRunning else {
-            statusMessage = "同步服务未运行。"
-            return
+    func stopAllProfiles() {
+        for id in engines.keys {
+            stopProfile(id)
         }
-        syncEngine?.runManualSync()
+    }
+
+    func syncProfile(_ id: UUID) {
+        engines[id]?.runManualSync()
+    }
+
+    func syncAllProfiles() {
+        for engine in engines.values {
+            engine.runManualSync()
+        }
+    }
+
+    func isProfileRunning(_ id: UUID) -> Bool {
+        engines.keys.contains(id)
+    }
+
+    func isProfileSyncing(_ id: UUID) -> Bool {
+        syncingStates[id] ?? false
+    }
+
+    func profileLastSyncDate(_ id: UUID) -> Date? {
+        lastSyncDates[id]
     }
 
     func appendLog(_ message: String) {
@@ -232,20 +196,25 @@ final class AppModel: ObservableObject {
         logs.removeAll()
     }
 
-    func setReminderListSelected(_ reminderListID: String, isSelected: Bool) {
-        if isSelected {
-            selectedReminderListIDs.insert(reminderListID)
-        } else {
-            selectedReminderListIDs.remove(reminderListID)
+    func deviceName(for deviceId: String) -> String {
+        devices.first { $0.deviceId == deviceId }?.displayName ?? deviceId
+    }
+
+    func listNames(for listIDs: [String]) -> [String] {
+        listIDs.compactMap { id in
+            reminderLists.first { $0.id == id }?.displayName
         }
     }
 
-    func selectAllReminderLists() {
-        selectedReminderListIDs = Set(reminderLists.map(\.id))
-    }
-
-    func clearReminderListSelection() {
-        selectedReminderListIDs = []
+    private func updateProfileDeviceNames() {
+        for (index, profile) in profileManager.profiles.enumerated() {
+            if let device = devices.first(where: { $0.deviceId == profile.deviceId }) {
+                var updated = profile
+                updated.deviceName = device.displayName
+                profileManager.profiles[index] = updated
+            }
+        }
+        profileManager.save()
     }
 
     static let displayDateFormatter: DateFormatter = {
@@ -257,9 +226,7 @@ final class AppModel: ObservableObject {
 
     private enum Keys {
         static let apiKey = "ReminderScreenSync.apiKey"
-        static let selectedDeviceId = "ReminderScreenSync.selectedDeviceId"
-        static let selectedReminderListIDs = "ReminderScreenSync.selectedReminderListIDs"
-        static let pollIntervalMinutesText = "ReminderScreenSync.pollIntervalMinutesText"
+        static let autoStartSync = "ReminderScreenSync.autoStartSync"
     }
 
     private static func hasFullReminderAccess(_ status: EKAuthorizationStatus) -> Bool {

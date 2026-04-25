@@ -1,6 +1,6 @@
 # AI便利贴提醒事项同步
 
-`AI便利贴提醒事项同步` 是一个 macOS 原生应用，用于在 Apple Reminders 与 Zectrix `AI便利贴` 设备之间执行双向同步。应用支持多列表合并、设备选择、轮询周期配置、同步日志审计，以及基于“最新修改时间”的冲突处理。
+`AI便利贴提醒事项同步` 是一个 macOS 原生应用，用于在 Apple Reminders 与 Zectrix `AI便利贴` 设备之间执行双向同步。应用支持多列表合并、多设备映射、菜单栏常驻、开机自启动、轮询周期配置、同步日志审计，以及基于“最新修改时间”的冲突处理。
 
 ## 重要提示
 
@@ -16,12 +16,15 @@
 ## 主要能力
 
 - 多个 Apple Reminders 列表勾选后合并同步到同一台 AI便利贴设备
+- **多设备多列表映射**：支持创建多个独立同步任务，每个任务对应不同设备和列表组合
+- **菜单栏常驻模式**：关闭主窗口后仍通过菜单栏运行，支持快速查看状态和一键同步
+- **开机自启动 + 自动恢复**：登录时自动启动应用，并自动恢复上次运行的同步任务
 - Apple Reminders 变更监听 + 设备端定时轮询
 - 标题唯一时自动配对；标题重复时采用保守策略，跳过自动配对和自动删除
 - 待办标题、备注、日期、时间、优先级、完成状态双向同步
 - 支持基础重复规则同步：`daily / weekly / monthly / yearly`
 - 对逾期待办、已完成待办、设备删除、设备 `id` 复用等场景提供保护逻辑
-- 本地运行日志，便于排查同步行为
+- 本地运行日志，便于排查同步行为（带任务名称前缀）
 
 ## 同步规则摘要
 
@@ -70,8 +73,12 @@ xcodebuild -project ReminderScreenSync.xcodeproj \
 
 ```text
 ReminderScreenSync/
-├── AppModel.swift          # UI 状态与同步服务生命周期
-├── ContentView.swift       # SwiftUI 主界面
+├── AppModel.swift          # UI 状态与多 Profile 同步服务生命周期
+├── ContentView.swift       # SwiftUI 主界面（Profile 列表 + 全局操作）
+├── ProfileEditView.swift   # 同步任务编辑 Sheet
+├── ProfileManager.swift    # 多同步任务 CRUD 与旧配置迁移
+├── MenuBarView.swift       # 菜单栏常驻弹出面版
+├── LaunchService.swift     # 开机自启动（SMAppService）封装
 ├── ReminderStore.swift     # Apple Reminders / EventKit 访问层
 ├── ZectrixAPIClient.swift  # 极趣云平台 API 客户端
 ├── SyncEngine.swift        # 双向同步核心逻辑
@@ -81,11 +88,12 @@ ReminderScreenSync/
 
 ## 使用流程
 
-1. 打开应用并填写极趣云平台 API Key。
-2. 加载设备并选择目标 AI便利贴。
-3. 授权 Apple Reminders，并勾选需要参与同步的列表。
-4. 设置设备轮询周期（分钟）。
-5. 启动同步服务。
+1. 打开应用，在「准备工作」面板中**授权 Apple Reminders**并填写极趣云平台 API Key。
+2. 点击「加载设备」获取账号下的 AI便利贴 设备列表。
+3. 点击「添加任务」，在弹出的编辑窗口中选择目标设备、Reminders 列表和轮询周期。
+4. 点击任务卡片上的「启动」开始同步；也可使用「全部启动」一次性启动所有任务。
+5. （可选）勾选「登录时自动启动」，下次开机将自动恢复同步。
+6. 关闭主窗口后，应用仍通过**菜单栏图标**保持运行，可随时一键同步或退出。
 
 ## 隐私与数据
 

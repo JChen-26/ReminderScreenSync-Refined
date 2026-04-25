@@ -463,3 +463,13 @@ struct SyncLogEntry: Identifiable {
     let timestamp: Date
     let message: String
 }
+
+struct SyncProfile: Codable, Identifiable, Hashable {
+    let id: UUID
+    var name: String
+    var deviceId: String
+    var deviceName: String
+    var reminderListIDs: [String]
+    var pollIntervalMinutes: Int
+    var isEnabled: Bool
+}

@@ -7,11 +7,16 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		23B62F9D524347D68BBB0B23 /* MenuBarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8D62D9D8792458581E90309 /* MenuBarView.swift */; };
 		0AE29BA168FFBB6D87E9B8D7 /* Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = C48CCCB2A66670029F2BC506 /* Models.swift */; };
 		18185BC1CFCF1CED3C0D29BF /* SyncRecordStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A352E6887F1BC55BCF4731A /* SyncRecordStore.swift */; };
+		C5BD5329E47F473C9FCB0D13 /* ProfileEditView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1755EAF12D47410AAE4C883E /* ProfileEditView.swift */; };
+		CDFB5FBAE81041D6B0E27792 /* ProfileManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 07A214D55FBA45B7B21C418E /* ProfileManager.swift */; };
+		5C20F121869E41BA9C6FCE80 /* LaunchService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 024A884525394037AAE5B45B /* LaunchService.swift */; };
 		250F7685120E02261AD33F06 /* AppConstants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 298B8E68B077F74469392808 /* AppConstants.swift */; };
 		3658C39078A4C497DE5E1F12 /* AppModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 330264B1B61FAA88A40DC330 /* AppModel.swift */; };
 		38C49E8103CA9904EE9D90E1 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 1AB0D796DAB8B35D96B2BEC0 /* Assets.xcassets */; };
+		00A585252CF243AE98ADC21A /* ServiceManagement.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1902CDDC6364479D836DF31B /* ServiceManagement.framework */; };
 		3928C0D8628AD43F175F8433 /* ReminderScreenSyncApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46357823C9B310A14C78125E /* ReminderScreenSyncApp.swift */; };
 		57042A3CBF3B2AD23E9E8C52 /* ZectrixAPIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2806D7A97A4AAAB679158157 /* ZectrixAPIClient.swift */; };
 		60EDE26A16E4EEC130A5F6B3 /* ReminderStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBBBA4534E233070C8567D30 /* ReminderStore.swift */; };
@@ -21,9 +26,14 @@
 
 /* Begin PBXFileReference section */
 		17B969803E3F4CF42F39F1F0 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		E8D62D9D8792458581E90309 /* MenuBarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuBarView.swift; sourceTree = "<group>"; };
 		1AB0D796DAB8B35D96B2BEC0 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		2806D7A97A4AAAB679158157 /* ZectrixAPIClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZectrixAPIClient.swift; sourceTree = "<group>"; };
+		07A214D55FBA45B7B21C418E /* ProfileManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileManager.swift; sourceTree = "<group>"; };
+		1755EAF12D47410AAE4C883E /* ProfileEditView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileEditView.swift; sourceTree = "<group>"; };
+		024A884525394037AAE5B45B /* LaunchService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LaunchService.swift; sourceTree = "<group>"; };
 		298B8E68B077F74469392808 /* AppConstants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppConstants.swift; sourceTree = "<group>"; };
+		1902CDDC6364479D836DF31B /* ServiceManagement.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ServiceManagement.framework; path = System/Library/Frameworks/ServiceManagement.framework; sourceTree = SDKROOT; };
 		2E5E616E226A62A241B27341 /* ReminderScreenSync.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ReminderScreenSync.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		330264B1B61FAA88A40DC330 /* AppModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppModel.swift; sourceTree = "<group>"; };
 		46357823C9B310A14C78125E /* ReminderScreenSyncApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReminderScreenSyncApp.swift; sourceTree = "<group>"; };
@@ -40,6 +50,7 @@
 			children = (
 				659305870FA95E4A70AFDEC7 /* ReminderScreenSync */,
 				5D1DBE09F85767E94D4E022F /* Products */,
+				427D7009A3B0467596A424B3 /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -55,11 +66,15 @@
 			isa = PBXGroup;
 			children = (
 				298B8E68B077F74469392808 /* AppConstants.swift */,
+				024A884525394037AAE5B45B /* LaunchService.swift */,
 				330264B1B61FAA88A40DC330 /* AppModel.swift */,
 				1AB0D796DAB8B35D96B2BEC0 /* Assets.xcassets */,
 				17B969803E3F4CF42F39F1F0 /* ContentView.swift */,
+				E8D62D9D8792458581E90309 /* MenuBarView.swift */,
 				498E0749E48D3A8BA3B34720 /* Info.plist */,
 				C48CCCB2A66670029F2BC506 /* Models.swift */,
+				07A214D55FBA45B7B21C418E /* ProfileManager.swift */,
+				1755EAF12D47410AAE4C883E /* ProfileEditView.swift */,
 				46357823C9B310A14C78125E /* ReminderScreenSyncApp.swift */,
 				CBBBA4534E233070C8567D30 /* ReminderStore.swift */,
 				DBF95487866E10F50EB50682 /* SyncEngine.swift */,
@@ -76,6 +91,7 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = BAC6A1934FD00EF996EEBCE5 /* Build configuration list for PBXNativeTarget "ReminderScreenSync" */;
 			buildPhases = (
+				CD75156BEDFB4BAC8E225917 /* Frameworks */,
 				1DBC90B36B5FF77D46D97465 /* Sources */,
 				91E7FCCDD7653CBF69256A68 /* Resources */,
 			);
@@ -122,6 +138,17 @@
 		};
 /* End PBXProject section */
 
+/* Begin PBXFrameworksBuildPhase section */
+		CD75156BEDFB4BAC8E225917 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				00A585252CF243AE98ADC21A /* ServiceManagement.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
 /* Begin PBXResourcesBuildPhase section */
 		91E7FCCDD7653CBF69256A68 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
@@ -139,9 +166,13 @@
 			buildActionMask = 2147483647;
 			files = (
 				250F7685120E02261AD33F06 /* AppConstants.swift in Sources */,
+				5C20F121869E41BA9C6FCE80 /* LaunchService.swift in Sources */,
 				3658C39078A4C497DE5E1F12 /* AppModel.swift in Sources */,
 				9DA1F1E98F720B789F0DD6E0 /* ContentView.swift in Sources */,
+				23B62F9D524347D68BBB0B23 /* MenuBarView.swift in Sources */,
 				0AE29BA168FFBB6D87E9B8D7 /* Models.swift in Sources */,
+				CDFB5FBAE81041D6B0E27792 /* ProfileManager.swift in Sources */,
+				C5BD5329E47F473C9FCB0D13 /* ProfileEditView.swift in Sources */,
 				3928C0D8628AD43F175F8433 /* ReminderScreenSyncApp.swift in Sources */,
 				60EDE26A16E4EEC130A5F6B3 /* ReminderStore.swift in Sources */,
 				69A6F30B67EE785EFFD4BF9F /* SyncEngine.swift in Sources */,
@@ -223,6 +254,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
+				CODE_SIGNING_ALLOWED = NO;
 				COMBINE_HIDPI_IMAGES = YES;
 				DEVELOPMENT_TEAM = FD64Y49J9Q;
 				ENABLE_HARDENED_RUNTIME = YES;
@@ -245,6 +277,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
+				CODE_SIGNING_ALLOWED = NO;
 				COMBINE_HIDPI_IMAGES = YES;
 				DEVELOPMENT_TEAM = FD64Y49J9Q;
 				ENABLE_HARDENED_RUNTIME = YES;
