@@ -7,7 +7,10 @@ struct MenuBarView: View {
         VStack(spacing: 14) {
             header
             statusCard
+            Divider()
             actionButtons
+            Divider()
+            settingsSection
         }
         .padding(16)
         .frame(width: 260)
@@ -98,9 +101,19 @@ struct MenuBarView: View {
     }
 
     private func openMainWindow() {
-        NSApplication.shared.activate(ignoringOtherApps: true)
-        for window in NSApplication.shared.windows {
-            window.makeKeyAndOrderFront(nil)
+        model.showDockAndActivate()
+    }
+
+    private var settingsSection: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Toggle("开机自动启动", isOn: Binding(
+                get: { model.launchAtLogin },
+                set: { model.setLaunchAtLogin($0) }
+            ))
+            Toggle("启动时自动同步", isOn: $model.autoStartSync)
+            Toggle("仅菜单栏运行时隐藏 Dock", isOn: $model.hideDockWhenMenuBarOnly)
         }
+        .font(.system(size: 12))
+        .foregroundStyle(.secondary)
     }
 }

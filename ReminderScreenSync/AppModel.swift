@@ -1,3 +1,4 @@
+import AppKit
 import EventKit
 import Foundation
 
@@ -20,6 +21,13 @@ final class AppModel: ObservableObject {
             UserDefaults.standard.set(autoStartSync, forKey: Keys.autoStartSync)
         }
     }
+    @Published var hideDockWhenMenuBarOnly: Bool {
+        didSet {
+            UserDefaults.standard.set(hideDockWhenMenuBarOnly, forKey: Keys.hideDockWhenMenuBarOnly)
+            updateDockPolicy()
+        }
+    }
+    @Published var launchAtLogin: Bool = false
     @Published var editingProfile: SyncProfile? = nil
 
     let reminderStore = ReminderStore()
@@ -32,7 +40,10 @@ final class AppModel: ObservableObject {
     init() {
         self.apiKey = UserDefaults.standard.string(forKey: Keys.apiKey) ?? ""
         self.autoStartSync = UserDefaults.standard.bool(forKey: Keys.autoStartSync)
+        self.hideDockWhenMenuBarOnly = UserDefaults.standard.bool(forKey: Keys.hideDockWhenMenuBarOnly)
+        self.launchAtLogin = LaunchService.shared.isEnabled
         reminderStore.refreshAuthorizationSummary()
+        observeWindows()
     }
 
     var isRunning: Bool { !engines.isEmpty }
@@ -41,6 +52,7 @@ final class AppModel: ObservableObject {
     var runningProfileCount: Int { engines.count }
 
     func bootstrap() async {
+        updateDockPolicy()
         if Self.hasFullReminderAccess(EKEventStore.authorizationStatus(for: .reminder)) {
             await loadReminderLists()
         }
@@ -217,6 +229,69 @@ final class AppModel: ObservableObject {
         profileManager.save()
     }
 
+    func showDockAndActivate() {
+        if hideDockWhenMenuBarOnly {
+            NSApp.setActivationPolicy(.regular)
+        }
+        NSApp.activate(ignoringOtherApps: true)
+        for window in NSApp.windows where !(window is NSPanel) {
+            window.makeKeyAndOrderFront(nil)
+        }
+    }
+
+    func setLaunchAtLogin(_ enabled: Bool) {
+        let success = LaunchService.shared.setEnabled(enabled)
+        launchAtLogin = LaunchService.shared.isEnabled
+        if !success {
+            appendLog("开机自动启动设置失败：\(LaunchService.shared.statusDescription)")
+        } else if launchAtLogin != enabled {
+            appendLog("开机自动启动需要系统授权，请到系统设置 > 通用 > 登录项中允许本应用。")
+        }
+    }
+
+    func updateDockPolicy() {
+        guard hideDockWhenMenuBarOnly else {
+            if NSApp.activationPolicy() != .regular {
+                NSApp.setActivationPolicy(.regular)
+                appendLog("Dock 策略：已恢复显示（功能已关闭）")
+            }
+            return
+        }
+
+        let allWindows = NSApp.windows
+        guard !allWindows.isEmpty else { return }
+
+        // 主窗口特征：可见、且可以成为 main window
+        // MenuBarExtra 的弹窗通常是 NSPanel，canBecomeMain 为 false
+        let visibleMainWindows = allWindows.filter { $0.isVisible && $0.canBecomeMain }
+        let hasMainWindow = !visibleMainWindows.isEmpty
+
+        if hasMainWindow && NSApp.activationPolicy() != .regular {
+            NSApp.setActivationPolicy(.regular)
+            appendLog("Dock 策略：主窗口可见，已显示 Dock")
+        } else if !hasMainWindow && NSApp.activationPolicy() != .accessory {
+            NSApp.setActivationPolicy(.accessory)
+            appendLog("Dock 策略：仅菜单栏运行，已隐藏 Dock")
+        }
+    }
+
+    private func observeWindows() {
+        NotificationCenter.default.addObserver(
+            forName: NSWindow.willCloseNotification,
+            object: nil,
+            queue: .main
+        ) { [weak self] notification in
+            MainActor.assumeIsolated {
+                if let window = notification.object as? NSWindow {
+                    self?.appendLog("窗口关闭事件：\(window.title.isEmpty ? "无标题" : window.title)（canBecomeMain: \(window.canBecomeMain)）")
+                }
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+                    self?.updateDockPolicy()
+                }
+            }
+        }
+    }
+
     static let displayDateFormatter: DateFormatter = {
         let formatter = DateFormatter()
         formatter.dateStyle = .medium
@@ -227,6 +302,7 @@ final class AppModel: ObservableObject {
     private enum Keys {
         static let apiKey = "ReminderScreenSync.apiKey"
         static let autoStartSync = "ReminderScreenSync.autoStartSync"
+        static let hideDockWhenMenuBarOnly = "ReminderScreenSync.hideDockWhenMenuBarOnly"
     }
 
     private static func hasFullReminderAccess(_ status: EKAuthorizationStatus) -> Bool {
